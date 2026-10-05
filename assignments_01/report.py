@@ -41,20 +41,21 @@ def main() -> None:
 
 # Reflection
 #
-# 1. I used Pydantic for WeatherResponse because the JSON data comes from
-#    outside the program and needs validation before I trust it.
+# 1. Rejecting the whole file when one temperature is null can be useful when
+#    complete data is required, for example before training a model where missing
+#    values could produce unreliable results. In a reporting pipeline, however,
+#    I might prefer to tolerate a small gap and still process the rest of the day.
+#    To allow that, I would change the schema to use list[float | None] for
+#    temperature_2m and then handle None values later in the pipeline.
 #
-# 2. I used dataclasses for HourlyReading and DailySummary because those
-#    objects are used inside the program after the external data has already
-#    been validated.
+# 2. If the pipeline runs at noon, the current day only has about 12 hourly
+#    observations, so min_hours=24 would treat that day as incomplete and drop it.
+#    incomplete_days() helps by identifying which dates were dropped, so the
+#    pipeline can report that the missing summary is caused by incomplete data.
 #
-# 3. The most useful tests were the validation and aggregation tests because
-#    they helped catch incorrect input and logic errors. When I intentionally
-#    changed temp_range() from subtraction to addition, the tests immediately
-#    showed the wrong calculated values.
-#
-# 4. One improvement I would make next is to add more validation for timestamps
-#    and more edge-case tests for missing or incomplete weather data.
+# 3. Keeping weatherkit as a package makes it easier in Week 10 for another
+#    pipeline module to import only the classes and functions it needs, such as
+#    WeatherResponse, to_readings, and DailyAggregator, without running report.py.
 
 
 # Without this guard, main() would run automatically whenever report.py
