@@ -70,6 +70,10 @@ def test_lower_min_hours_keeps_same_day():
     assert len(summaries) == 1
     assert summaries[0].date == "2026-04-08"
 
+# Verification step: I temporarily changed DailySummary.temp_range() from
+# subtraction to addition. test_temp_range failed for all three parametrized
+# cases, confirming that the test catches that deliberate bug. I then restored
+# the correct subtraction implementation.
 
 @pytest.mark.parametrize(
     "temp_max, temp_min, expected_range",
