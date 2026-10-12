@@ -59,7 +59,7 @@ is_rainy = rng.integers(0 , 2, num_days).astype(float)
 
 temp_max = (
     1.0 * temp_min
-    + 6 
+    + 6
     - 4 * is_rainy
     + rng.normal(0 , 2, num_days)
 )
