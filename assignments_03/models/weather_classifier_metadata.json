@@ -1,0 +1,15 @@
+{
+    "model_name": "KNN",
+    "city": "Los Angeles",
+    "features": [
+        "temperature_2m_max",
+        "temperature_2m_min",
+        "precipitation_sum",
+        "wind_speed_10m_max"
+    ],
+    "label_rule": "Good=1 when 7 <= temperature_2m_max <= 26, temperature_2m_min >= 0, precipitation_sum < 3, wind_speed_10m_max < 30; otherwise Skip=0",
+    "python_version": "3.13.14",
+    "sklearn_version": "1.9.1",
+    "test_accuracy": 0.9863013698630136,
+    "test_f1": 0.9841269841269841
+}
