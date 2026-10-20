@@ -1,0 +1,8 @@
+{
+    "model_name": "Weather AI",
+    "features": [
+        "temperature",
+        "precipitation",
+        "wind_speed"
+    ]
+}
