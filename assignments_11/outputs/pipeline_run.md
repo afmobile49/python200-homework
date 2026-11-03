@@ -1,0 +1,4 @@
+﻿# Assignment 11 - Cloud ETL Capstone
+## Pipeline Run Reflection
+
+My pipeline did not run successfully on the first try because Supabase did not allow me to write to the `weather_raw` table. Prefect showed the error in the logs and retried the task twice, but it still failed. I fixed the problem by giving the `service_role` the required database permissions. After that, I ran the pipeline again, and all four tasks completed successfully without any retries. The pipeline loaded 365 weather records, but it skipped the LLM step because all those dates had already been enriched. I checked the LLM summaries in Supabase, and the recommendation for January 2, 2023, seemed useful because it suggested skipping running due to light rain and moderate wind. If I deployed this pipeline to run every day, I would add automatic scheduling, better error notifications, and a check to process only new weather data.
