@@ -231,16 +231,35 @@ CUSTOM_QUERIES = [
 ]
 
 
+
+
 def run_custom_queries():
     """Run only Task 4 with fresh agent state for each question."""
     agent = create_happiness_agent()
+
     for i, query in enumerate(CUSTOM_QUERIES, 1):
         print(f"\n--- Task 4 / Custom query {i} ---", flush=True)
+
         try:
-            # No DataFrame injection: these questions use the four provided tools.
-            # reset=True avoids carrying all previous tokens into the next query.
+            # No DataFrame injection: these questions use the four tools.
+            # reset=True avoids carrying previous tokens into the next query.
+
+            if i == 1:
+                # Custom Query 1: Both tool use and code generation.
+                # CodeAgent generated Python code to call
+                # load_happiness_data and get_top_n_countries
+                # to find the five happiest countries in 2015.
+                pass
+            elif i == 2:
+                # Custom Query 2: Both tool use and code generation.
+                # CodeAgent generated Python code to call
+                # load_happiness_data and compute_correlation
+                # to analyze healthy life expectancy and happiness.
+                pass
+
             result = agent.run(query, reset=True)
             print(f"Custom query {i} answer: {result}", flush=True)
+
         except Exception as exc:
             print(f"Custom query {i} failed: {type(exc).__name__}: {exc}")
             break
