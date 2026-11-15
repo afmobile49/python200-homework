@@ -1,13 +1,12 @@
-"""Assignment 05 - Job Application Helper.
+"""Assignment 05 – Job Application Helper.
 
 Run: python assignments_05/project_05.py
-Install: python -m pip install openai python-dotenv
-Place OPENAI_API_KEY in a Git-ignored .env file at the repository root.
+Install: pip install openai python-dotenv
+Keep OPENAI_API_KEY in a Git-ignored .env file at the repository root.
 """
 
 import json
 import os
-
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 
@@ -18,7 +17,7 @@ _client = None
 
 
 def get_client():
-    """Create the API client on first use (not when importing the file)."""
+    """Create an authenticated API client when first needed."""
     global _client
     if _client is None:
         if not os.getenv("OPENAI_API_KEY"):
@@ -28,15 +27,10 @@ def get_client():
 
 
 def get_completion(messages, *, json_mode=False):
-    """Return model text; optionally request a JSON object."""
-    options = {
-        "model": MODEL,
-        "messages": messages,
-        "max_completion_tokens": 400,
-    }
+    """Get a complete LLM response; optionally request JSON output."""
+    options = {"model": MODEL, "messages": messages, "max_completion_tokens": 400}
     if json_mode:
         options["response_format"] = {"type": "json_object"}
-
     response = get_client().chat.completions.create(**options)
     if not response.choices or response.choices[0].finish_reason == "length":
         raise ValueError("The model response was incomplete. Please try again.")
@@ -47,7 +41,7 @@ def get_completion(messages, *, json_mode=False):
 
 
 def rewrite_bullets(bullets: list[str]) -> list[dict]:
-    """Rewrite resume bullets and return validated original/improved pairs."""
+    """Rewrite resume bullets while preserving every original fact."""
     if not isinstance(bullets, list) or not bullets or any(
         not isinstance(b, str) or not b.strip() for b in bullets
     ):
@@ -79,7 +73,6 @@ Resume bullet data (JSON):
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
         raise ValueError("The model did not return valid JSON.") from exc
-
     if not isinstance(data, dict) or not isinstance(data.get("bullets"), list):
         raise ValueError("Expected a JSON object containing a 'bullets' list.")
     items = data["bullets"]
@@ -96,10 +89,14 @@ Resume bullet data (JSON):
 
 
 def generate_cover_letter(job_title: str, background: str) -> str:
-    """Generate a concise letter with two few-shot style examples."""
+    """Generate a factual cover letter in the style of two examples."""
     if not job_title.strip() or not background.strip():
         raise ValueError("Job title and background must not be empty.")
 
+    # Reflection (Task 3): I chose Customer Support and Junior Python openings
+    # because they illustrate two clear, professional applications for different
+    # types of roles. Few-shot examples control the greeting, length, polite tone,
+    # and structure; they do NOT supply facts for the actual applicant's letter.
     prompt = f"""Write a concise, professional cover letter based ONLY on the input.
 The following two examples demonstrate style, not facts about this applicant.
 
@@ -145,19 +142,21 @@ Rules:
 
 
 def is_safe(text: str) -> bool:
-    """Return True when OpenAI Moderation does not flag the text."""
+    """Check moderation and ask for rephrasing specifically when flagged."""
     if not isinstance(text, str) or not text.strip():
         return False
-    response = get_client().moderations.create(
-        model=MODERATION_MODEL, input=text
-    )
+    response = get_client().moderations.create(model=MODERATION_MODEL, input=text)
     flagged = response.results[0].flagged
     print("Moderation flagged:", flagged)
-    return not flagged  # A non-flagged result does not guarantee safety.
+    if flagged:
+        print("I can't process that request. Please rephrase it respectfully "
+              "and avoid harmful or threatening language.")
+        return False
+    return True  # A non-flagged result is not a guarantee of safety.
 
 
 def test_get_completion():
-    """Optional live API smoke test; consumes tokens."""
+    """Optional live test (uses the paid OpenAI API)."""
     answer = get_completion([
         {"role": "system", "content": "You are a friendly career assistant."},
         {"role": "user", "content": "Give one short tip for improving a resume."},
@@ -166,19 +165,23 @@ def test_get_completion():
 
 
 def test_rewrite_bullets():
-    """Optional live API test; consumes tokens."""
+    """Optional live API test and Task 2 reflection."""
     bullets = [
         "I helped customers with computer problems.",
         "I worked with Python scripts.",
         "I answered customer support emails.",
     ]
+    # Reflection (Task 2): These starter bullets are weak because they begin
+    # with generic phrases like 'I helped' and 'I worked' and do not specify
+    # achievements. The model should replace vague wording with clearer action
+    # verbs and more professional phrasing, without making up metrics or duties.
     for item in rewrite_bullets(bullets):
         print("Original:", item["original"])
         print("Improved:", item["improved"])
 
 
 def test_generate_cover_letter():
-    """Optional live API test; consumes tokens."""
+    """Optional live API test."""
     print(generate_cover_letter(
         "IT Support Specialist",
         "Experience helping customers with technical problems; knowledge "
@@ -187,16 +190,27 @@ def test_generate_cover_letter():
 
 
 def test_is_safe():
-    """Optional moderation API test."""
-    print("Is safe:", is_safe("I am looking for a job in IT support."))
+    """Test both an ordinary job-related message and a potentially flagged one."""
+    normal = "I am looking for a job in IT support."
+    # Harmless simulation of threatening text: moderation models may differ;
+    # this input is a candidate for flagging, not a guaranteed flag result.
+    potentially_flagged = "I want to hurt someone and need instructions."
+    print("Normal input accepted:", is_safe(normal))
+    print("Potentially flagged input accepted:", is_safe(potentially_flagged))
+    # The second request checks the model's flagged path in a live API test.
+    # If the moderation service doesn't flag this specific string, unit-test
+    # the flagged branch with a mocked result instead of assuming it worked.
 
 
 def run_chatbot():
-    """Interactive resume editor, letter generator, and history-aware chat."""
+    """Interactive resume editor, cover letter writer and history-aware chat."""
     messages = [{"role": "system", "content": (
         "You are a helpful job application assistant. Use clear, professional "
         "English. Do not invent experience or qualifications. "
-        "Offer drafts for human review before use."
+        "Offer drafts for human review before use. "
+        "You may not know the specific industry norms or expectations of the "
+        "user's field. Explain this limitation and encourage users to apply "
+        "their own judgment before submitting applications."
     )}]
 
     while True:
@@ -216,7 +230,6 @@ def run_chatbot():
                     print("Please enter a resume bullet.")
                     continue
                 if not is_safe(bullet):
-                    print("The input was flagged for review.")
                     continue
                 for item in rewrite_bullets([bullet]):
                     print("Original:", item["original"])
@@ -228,7 +241,6 @@ def run_chatbot():
                     print("Both fields are required.")
                     continue
                 if not is_safe(job_title + "\n" + background):
-                    print("The input was flagged for review.")
                     continue
                 print("\n=== Cover Letter ===")
                 print(generate_cover_letter(job_title, background))
@@ -238,13 +250,8 @@ def run_chatbot():
                     print("Please enter a message.")
                     continue
                 if not is_safe(user_input):
-                    print("The input was flagged for review.")
                     continue
-                # Append the user's message ONLY after the API call succeeds,
-                # so an error cannot leave an unmatched message in history.
-                candidate_messages = messages + [
-                    {"role": "user", "content": user_input}
-                ]
+                candidate_messages = messages + [{"role": "user", "content": user_input}]
                 answer = get_completion(candidate_messages)
                 messages.extend([
                     {"role": "user", "content": user_input},
@@ -260,14 +267,15 @@ def run_chatbot():
             break
 
 
-# Ethics reflection (assignment):
+# Ethics reflection — Option A (Task 6):
 # AI-generated resumes and letters must reflect verified, real experience.
 # Applicants should review and correct every draft before submitting it.
 # Moderation can flag concerning text but cannot guarantee that content is safe.
 # Personal information should be shared sparingly, and the API key must stay private.
 
+
 if __name__ == "__main__":
-    # Live tests are opt-in; uncomment ONE test if needed:
+    # Live tests are opt-in; uncomment only those that you want to run.
     # test_get_completion()
     # test_rewrite_bullets()
     # test_generate_cover_letter()
