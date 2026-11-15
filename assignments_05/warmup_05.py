@@ -78,9 +78,9 @@ def api_question_2():
         )}], temperature=temperature, max_tokens=40)
         print(f"\nTemperature: {temperature}")
         print("Answer:", answer_text(response))
-    # Observation: a higher temperature can increase variation, but does not
-    # guarantee a higher-quality answer. Record actual results after running.
-
+    # Observation: A higher temperature can increase variation, but does not
+    # guarantee a higher-quality answer.
+    # I would choose temperature=0 for more consistent and reproducible results.
 
 def api_question_3():
     """API Q3: get three completions in one API call."""
@@ -96,12 +96,13 @@ def api_question_4():
     """API Q4: demonstrate truncated output with a small token budget."""
     response = ask([{"role": "user", "content": (
         "Explain five advantages of learning Python programming in detail."
-    )}], max_tokens=25)
+    )}], max_tokens=15)
     print("Answer:", answer_text(response))
     print("Finish reason:", response.choices[0].finish_reason)
     print("Total tokens:", response.usage.total_tokens)
     # A finish_reason of 'length' means output reached its token budget.
-
+    # In a real application, max_tokens helps limit response length,
+    # control API costs, and prevent unnecessarily long outputs.
 
 def system_question_1():
     """System Q1: compare two system personalities."""
@@ -118,6 +119,17 @@ def system_question_1():
         print("\nPersona:", label)
         print("Answer:", answer_text(response))
         print("Tokens:", response.usage.total_tokens)
+
+
+    # Reflection: Both personas answered the same question about
+    # Python functions, but their explanations had different styles.
+    # The Beginner Teacher used friendly, simple language and
+    # a real-world example, making the answer easier for beginners.
+    # The Senior Developer used more precise technical terminology,
+    # making the explanation more suitable for experienced programmers.
+    # This shows how a system prompt can change the tone and
+    # level of detail without changing the user's question.
+
 
 
 def system_question_2():
