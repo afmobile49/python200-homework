@@ -162,9 +162,18 @@ def prompt_question_1():
     return classify_reviews("Zero-shot", "")
 
 
+
 def prompt_question_2():
     """Prompt Q2: one-shot classification of the SAME reviews."""
     example = "Example (different from the three test reviews):\nReview: The camera works great.\nSentiment: positive"
+
+    # Observation: Both zero-shot (Q1) and one-shot (Q2)
+    # produced the same labels: positive, negative, and mixed.
+    # Adding one example did not change the output format or
+    # classification results in this test. However, the example
+    # made the expected label format clearer and may help
+    # improve consistency with less familiar inputs.
+
     return classify_reviews("One-shot", example)
 
 
