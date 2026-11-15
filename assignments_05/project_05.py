@@ -204,6 +204,21 @@ def test_is_safe():
 
 def run_chatbot():
     """Interactive resume editor, cover letter writer and history-aware chat."""
+
+
+    # Task 1 - System prompt design reflection:
+    # I chose to explicitly prohibit invented experience and
+    # qualifications because inaccurate claims could harm
+    # a user's job application.
+    #
+    # I also added an industry-norms disclaimer because AI
+    # may not understand the specific expectations of every
+    # profession. Users should review the suggested content
+    # and apply their own judgment before submitting it.
+    #
+    # Clear, professional English was chosen to make the
+    # assistant useful for resumes and cover letters.
+
     messages = [{"role": "system", "content": (
         "You are a helpful job application assistant. Use clear, professional "
         "English. Do not invent experience or qualifications. "

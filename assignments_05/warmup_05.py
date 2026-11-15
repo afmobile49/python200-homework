@@ -262,6 +262,33 @@ def ollama_comparison():
     print("Compare local qwen3:0.6b with cloud gpt-4o-mini using the SAME prompt.")
     print("Run ollama_question_1() while the Ollama service is running.")
 
+# Ollama Question 1 - Actual terminal output
+#
+# Command:
+# ollama run qwen3:0.6b "What is one advantage of Python for beginners? Answer in one sentence."
+#
+# The terminal displayed a Thinking section, followed by:
+#
+# ...done thinking.
+#
+# Python is easy to learn for beginners, making it accessible
+# to a wide range of users.
+#
+# The following comparison was also tested using the same prompt:
+# Local model: qwen3:0.6b
+# Local answer: Python is easy to learn, allowing beginners
+# to quickly get started with programming tasks.
+#
+# Cloud model: gpt-4o-mini-2024-07-18
+# Cloud answer: One advantage of Python for beginners is its
+# simple and readable syntax, which makes it easier to
+# learn and understand programming concepts.
+# Cloud tokens: 45
+#
+# Observation:
+# Both models gave relevant answers to the same prompt.
+# Ollama runs locally, while the OpenAI model uses a cloud API.
+
 
 def ollama_question_1():
     """Ollama Q1: make both calls with identical messages and compare results."""
@@ -282,7 +309,6 @@ def ollama_question_1():
     print("Cloud tokens:", cloud.usage.total_tokens)
     # Compare factuality, clarity, length, speed, and resource/cost tradeoffs.
     # Ollama runs locally; the cloud API requires a key and may incur charges.
-
 
 if __name__ == "__main__":
     # Uncomment exactly ONE desired exercise. Each API call may incur charges.
