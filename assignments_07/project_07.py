@@ -242,7 +242,7 @@ def run_custom_queries():
 
         try:
             # No DataFrame injection: these questions use the four tools.
-            # reset=True avoids carrying previous tokens into the next query.
+            # reset=False preserves conversation context between custom queries.
 
             if i == 1:
                 # Custom Query 1: Both tool use and code generation.
@@ -257,7 +257,7 @@ def run_custom_queries():
                 # to analyze healthy life expectancy and happiness.
                 pass
 
-            result = agent.run(query, reset=True)
+            result = agent.run(query, reset=False)
             print(f"Custom query {i} answer: {result}", flush=True)
 
         except Exception as exc:
